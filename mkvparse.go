@@ -140,13 +140,13 @@ func parseElement(reader io.Reader, currentOffset int64, level int, handler Hand
 
 		switch typ {
 		case uintegerType:
-			handler.HandleInteger(id, int64(binary.BigEndian.Uint64(pad(data, 8))), info)
+			err = handler.HandleInteger(id, int64(binary.BigEndian.Uint64(pad(data, 8))), info)
 		case integerType:
-			handler.HandleInteger(id, convertBytesToSignedInt(data), info)
+			err = handler.HandleInteger(id, convertBytesToSignedInt(data), info)
 		case binaryType:
-			handler.HandleBinary(id, data, info)
+			err = handler.HandleBinary(id, data, info)
 		case stringType, utf8Type:
-			handler.HandleString(id, string(unpadString(data)), info)
+			err = handler.HandleString(id, string(unpadString(data)), info)
 		case floatType:
 			var value float64
 			if size == 4 {
@@ -156,11 +156,11 @@ func parseElement(reader io.Reader, currentOffset int64, level int, handler Hand
 			} else {
 				return -1, fmt.Errorf("unexpected float size: %d", size)
 			}
-			handler.HandleFloat(id, value, info)
+			err = handler.HandleFloat(id, value, info)
 		case dateType:
-			handler.HandleDate(id, baseDate.Add(time.Duration(convertBytesToSignedInt(data))), info)
+			err = handler.HandleDate(id, baseDate.Add(time.Duration(convertBytesToSignedInt(data))), info)
 		}
-		return count, nil
+		return count, err
 	}
 }
 
